@@ -58,10 +58,67 @@ CITY_LL = {
 }
 
 
+_GEO = None  # normalized name -> (tz, lat, lon, population, display, country)
+_GEO_FILE = __import__("os").path.join(__import__("os").path.dirname(__file__), "data", "cities.tsv.gz")
+
+
+def _norm(s: str) -> str:
+    s = s.strip().lower().replace("ё", "е").replace("’", "'").replace("ʼ", "'")
+    s = re.sub(r"^(г\.|город|city of)\s*", "", s)
+    s = re.sub(r"[\s_\-]+", " ", s).strip(" .,")
+    for suf in ("市",):
+        if len(s) > 2 and s.endswith(suf):
+            s = s[:-1]
+    return s
+
+
+def _geo():
+    """Lazy-load the GeoNames world city index (~70k cities, pop >= 5000)."""
+    global _GEO
+    if _GEO is None:
+        import gzip
+        idx: dict = {}
+        try:
+            with gzip.open(_GEO_FILE, "rt", encoding="utf-8") as f:
+                for line in f:
+                    name, ascii_, cc, lat, lon, tz, pop, alts = line.rstrip("\n").split("\t")
+                    rec = (tz, float(lat), float(lon), int(pop or 0), name, cc)
+                    for n in {name, ascii_, *alts.split("|")}:
+                        if not n:
+                            continue
+                        k = _norm(n)
+                        old = idx.get(k)
+                        if old is None or rec[3] > old[3]:
+                            idx[k] = rec
+        except FileNotFoundError:
+            pass
+        _GEO = idx
+    return _GEO
+
+
+def lookup_city(text: str):
+    """Return (tz, lat, lon, population, display, country) or None. Accepts 'City' or 'City, Country'."""
+    g = _geo()
+    k = _norm(text)
+    if k in g:
+        return g[k]
+    if "," in text:
+        city, _, country = text.partition(",")
+        r = g.get(_norm(city))
+        if r:
+            return r
+    return None
+
+
 def parse_place(text: str):
     """Returns (tzinfo, label, (lat, lon) or None)."""
     tz, label = parse_tz(text)
-    return tz, label, CITY_LL.get(text.strip().lower())
+    ll = CITY_LL.get(text.strip().lower())
+    if ll is None:
+        r = lookup_city(text)
+        if r:
+            ll = (r[1], r[2])
+    return tz, label, ll
 
 
 def parse_tz(text: str):
@@ -79,6 +136,17 @@ def parse_tz(text: str):
         return timezone(off), f"UTC{m.group(1)}{h:02d}:{mi:02d}"
     if key in ("utc", "gmt"):
         return timezone.utc, "UTC"
+    if "/" in t:
+        try:
+            return ZoneInfo(t), t
+        except (ZoneInfoNotFoundError, ValueError):
+            pass
+    r = lookup_city(t)
+    if r and r[0]:
+        try:
+            return ZoneInfo(r[0]), r[0]
+        except (ZoneInfoNotFoundError, ValueError):
+            pass
     try:
         return ZoneInfo(t), t
     except (ZoneInfoNotFoundError, ValueError):

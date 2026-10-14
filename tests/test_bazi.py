@@ -66,7 +66,7 @@ def test_parsers():
     assert parse_tz("+8")[1] == "UTC+08:00" and parse_tz("UTC-5:30")[1] == "UTC-05:30"
     assert parse_tz("北京")[1] == "Asia/Shanghai" and parse_tz("Europe/Berlin")[1] == "Europe/Berlin"
     with pytest.raises(bazi.ParseError):
-        parse_tz("Atlantis")
+        parse_tz("Xqzzyplace")
     assert parse_place("Москва")[2] == (55.76, 37.62) and parse_place("+3")[2] is None
 
 

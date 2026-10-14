@@ -40,7 +40,7 @@ async def test_bazi_conversation_zh(eng):
     assert "1990-05-15" in texts(await eng.text(42, "hello"))      # friendly error with example
     assert "时辰" in texts(await eng.text(42, "2000-01-01"))
     assert "城市" in texts(await eng.text(42, "00:00"))
-    assert "Europe/Berlin" in texts(await eng.text(42, "Atlantis"))
+    assert "Europe/Berlin" in texts(await eng.text(42, "Xqzzyplace"))
     rs = await eng.text(42, "北京")
     out = rs[0].text
     assert "己卯" in out and "壬子" in out and "五行" in out and "解读" in out and "仅供娱乐" in out
