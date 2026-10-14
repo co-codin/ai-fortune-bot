@@ -1,0 +1,16 @@
+# systemd --user unit. Token is NOT stored here: before starting run
+#   systemctl --user set-environment FORTUNE_BOT_TOKEN=xxxx   (kept in the user manager's memory only)
+# Install: cp deploy/fortune-bot.service ~/.config/systemd/user/ && systemctl --user daemon-reload
+#          systemctl --user start fortune-bot ; journalctl --user -u fortune-bot -f
+[Unit]
+Description=AI fortune-telling Telegram bot
+After=network-online.target
+
+[Service]
+WorkingDirectory=/workspace/fortune-bot
+ExecStart=/workspace/fortune-bot/run.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

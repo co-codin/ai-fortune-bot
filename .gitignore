@@ -1,0 +1,17 @@
+.venv/
+*.db
+bot.log
+bot.pid
+__pycache__/
+.pytest_cache/
+*.db-shm
+*.db-wal
+*.sqlite*
+*.log
+nohup.out
+.env
+.env.*
+!.env.example
+# private business notes
+gtm-plan.md
+stars-withdrawal.md
