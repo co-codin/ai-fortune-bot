@@ -1,0 +1,68 @@
+"""Template fallback for 解梦: common dream symbols with reflective (non-predictive) notes."""
+import re
+
+# (keywords regex — zh|en|ru, note zh, note en, note ru)
+SYMBOLS = [
+ (r"水|河|海|雨|洪|water|river|sea|ocean|rain|flood|вод|рек|мор|океан|дожд|наводн",
+  "水常象征情绪与潜意识：水清平静多表示内心安稳，浑浊汹涌可能反映压力。",
+  "Water often mirrors emotions: calm, clear water suggests inner peace; rough or murky water may reflect stress.",
+  "Вода часто отражает эмоции: спокойная и чистая — внутренний покой, бурная или мутная — напряжение."),
+ (r"蛇|snake|serpent|зме",
+  "蛇在传统解梦中常与变化、能量或隐藏的担忧相关。",
+  "Snakes are classic symbols of change, vital energy or a hidden worry.",
+  "Змея — классический символ перемен, жизненной энергии или скрытой тревоги."),
+ (r"掉|坠|跌|fall|falling|пада|упал",
+  "坠落的梦常与失控感或对某件事没有把握有关。",
+  "Falling dreams often reflect a sense of losing control or uncertainty about something.",
+  "Сны о падении часто связаны с ощущением потери контроля или неуверенности."),
+ (r"牙|teeth|tooth|зуб",
+  "掉牙的梦常与形象、自信或对变化的焦虑有关。",
+  "Teeth dreams are often linked to self-image, confidence or anxiety about change.",
+  "Сны о зубах часто связаны с образом себя, уверенностью или тревогой из-за перемен."),
+ (r"飞|fly|flying|лета|полёт|полет",
+  "飞翔常代表自由、突破限制或想要摆脱压力。",
+  "Flying often stands for freedom, breaking limits or a wish to rise above pressure.",
+  "Полёт часто означает свободу, преодоление ограничений или желание подняться над давлением."),
+ (r"追|逃|chase|chased|run away|гнал|погон|убега",
+  "被追赶的梦常反映你在回避某个问题或情绪。",
+  "Being chased often reflects something you are avoiding in waking life.",
+  "Погоня во сне часто отражает то, чего вы избегаете наяву."),
+ (r"考试|exam|test|экзамен",
+  "考试梦多与被评价的压力、对准备不足的担心有关。",
+  "Exam dreams usually reflect pressure to perform or fear of being unprepared.",
+  "Сны об экзаменах обычно отражают давление и страх оказаться неподготовленным."),
+ (r"死|去世|death|dead|\bdie\b|смерт|умер|умира",
+  "梦见死亡在解梦中通常象征结束与新的开始，而不是字面意义。",
+  "Death in dreams usually symbolises an ending and a new beginning, not a literal event.",
+  "Смерть во сне обычно символизирует завершение и новое начало, а не буквальное событие."),
+ (r"房|家|屋|house|home|дом|квартир",
+  "房子常象征自我与内心空间，不同的房间可能代表生活的不同方面。",
+  "A house often represents the self; different rooms can be different parts of your life.",
+  "Дом часто символизирует самого человека; разные комнаты — разные стороны жизни."),
+ (r"婴儿|宝宝|孩子|baby|child|младен|ребён|ребен",
+  "婴儿常象征新的想法、计划或你内心需要被照顾的部分。",
+  "A baby often symbolises a new idea or project, or a part of you that needs care.",
+  "Младенец часто символизирует новую идею или проект — или часть вас, которой нужна забота."),
+ (r"钱|金|money|gold|деньг|золот",
+  "钱财在梦中常与价值感、安全感和自我评价相关。",
+  "Money in dreams often relates to self-worth and a sense of security.",
+  "Деньги во сне часто связаны с самоценностью и чувством безопасности."),
+ (r"火|fire|огон|пожар",
+  "火既可代表热情与转化，也可能反映愤怒或急迫感。",
+  "Fire can mean passion and transformation — or anger and urgency.",
+  "Огонь может означать страсть и преображение — или гнев и спешку."),
+ (r"猫|狗|cat|dog|кош|собак|пёс|пес",
+  "动物常代表本能与直觉；狗多与忠诚、关系有关，猫多与独立、直觉有关。",
+  "Animals often stand for instincts: dogs for loyalty and bonds, cats for independence and intuition.",
+  "Животные часто олицетворяют инстинкты: собака — верность и связи, кошка — независимость и интуицию."),
+ (r"前任|\bex\b|бывш",
+  "梦见前任多与旧情绪的整理有关，未必代表仍有感情。",
+  "Dreaming of an ex usually means processing old feelings, not necessarily wanting them back.",
+  "Сон о бывшем обычно означает проработку старых чувств, а не обязательно желание вернуть прошлое."),
+]
+
+
+def match(text: str, lang: str):
+    idx = {"zh": 1, "en": 2, "ru": 3}.get(lang, 2)
+    t = text.lower()
+    return [s[idx] for s in SYMBOLS if re.search(s[0], t)][:4]
